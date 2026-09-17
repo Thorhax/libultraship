@@ -72,9 +72,14 @@ bool ControlDeck::AllGameInputBlocked() {
 
 bool ControlDeck::GamepadGameInputBlocked() {
     // block controller input when using the controller to navigate imgui menus
+#if defined(__SWITCH__)
+    constexpr int32_t defaultNav = 1;
+#else
+    constexpr int32_t defaultNav = 0;
+#endif
     return AllGameInputBlocked() ||
            Context::GetRawInstance()->GetWindow()->GetGui()->GetMenuOrMenubarVisible() &&
-               Ship::Context::GetRawInstance()->GetConsoleVariables()->GetInteger(CVAR_IMGUI_CONTROLLER_NAV, 0);
+               Ship::Context::GetRawInstance()->GetConsoleVariables()->GetInteger(CVAR_IMGUI_CONTROLLER_NAV, defaultNav);
 }
 
 bool ControlDeck::KeyboardGameInputBlocked() {
