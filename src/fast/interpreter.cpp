@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <stdio.h>
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__SWITCH__)
 #include <dlfcn.h>
 #endif
 
@@ -5801,9 +5801,10 @@ static bool IsValidResolvedAddress(uintptr_t addr) {
     }
 
     // Still in the N64 segmented range, but might be a false positive (a real low pointer).
-#if defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__) || defined(__SWITCH__)
     // The Emscripten heap starts near address 0, so real pointers routinely live below
     // 0x0FFFFFFF and the range heuristic would drop valid textures.
+    // On Nintendo Switch, dladdr is not available.
     return true;
 #elif defined(_WIN32)
     // For Windows, check whether the address belongs to a dll.

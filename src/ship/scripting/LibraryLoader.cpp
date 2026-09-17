@@ -8,6 +8,8 @@
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
+#elif defined(DISABLE_DLL_LOADER) || defined(__SWITCH__)
+// No dynamic linking on Switch
 #else
 #include <dlfcn.h>
 #include <unistd.h>
@@ -64,6 +66,8 @@ std::string LibraryLoader::GenerateTempFile() {
     close(fd);
     return std::string(pathTemplate);
 
+#elif defined(DISABLE_DLL_LOADER) || defined(__SWITCH__)
+    return "";
 #else
 #error "Unsupported Operating System"
 #endif
