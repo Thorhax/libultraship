@@ -214,28 +214,56 @@ void Config::Reload() {
 void Config::Save() {
     mNestedJson = mFlattenedJson.unflatten();
     const fs::path configPath(mPath);
+    if (!configPath.parent_path().empty()) {
+        std::error_code dirEc;
+        fs::create_directories(configPath.parent_path(), dirEc);
+    }
+
     const fs::path tempPath = configPath.parent_path() / (configPath.filename().string() + ".tmp");
     std::error_code ec;
+    bool writeTmpSuccess = false;
     {
         std::ofstream file(tempPath, std::ios::binary | std::ios::trunc);
-        if (!file.is_open()) {
+        if (file.is_open()) {
+            file << mNestedJson.dump(4);
+            file.flush();
+            if (file.good()) {
+                writeTmpSuccess = true;
+            } else {
+                SPDLOG_ERROR("Could not write \"{}\"; keeping the existing config", tempPath.string());
+                file.close();
+                fs::remove(tempPath, ec);
+            }
+        } else {
             SPDLOG_ERROR("Could not open \"{}\" to save config", tempPath.string());
-            return;
-        }
-        file << mNestedJson.dump(4);
-        file.flush();
-        if (!file.good()) {
-            SPDLOG_ERROR("Could not write \"{}\"; keeping the existing config", tempPath.string());
-            file.close();
-            fs::remove(tempPath, ec);
-            return;
         }
     }
-    fs::rename(tempPath, configPath, ec);
-    if (ec) {
-        SPDLOG_ERROR("Could not replace config \"{}\": {}", mPath, ec.message());
+
+    if (writeTmpSuccess) {
         std::error_code removeEc;
-        fs::remove(tempPath, removeEc);
+        // On Nintendo Switch Horizon OS / FATFS, fsFsRenameFile fails with 0x402 (EEXIST) if destination exists.
+        // Remove destination first so rename succeeds atomically within the filesystem.
+        if (fs::exists(configPath)) {
+            fs::remove(configPath, removeEc);
+        }
+        fs::rename(tempPath, configPath, ec);
+        if (ec) {
+            std::error_code copyEc;
+            fs::copy_file(tempPath, configPath, fs::copy_options::overwrite_existing, copyEc);
+            fs::remove(tempPath, removeEc);
+            if (copyEc) {
+                SPDLOG_ERROR("Could not replace config \"{}\": rename err: {}, copy err: {}", mPath, ec.message(), copyEc.message());
+            }
+        }
+    } else {
+        // Direct write fallback in case tmp file could not be opened/written
+        std::ofstream file(configPath, std::ios::binary | std::ios::trunc);
+        if (file.is_open()) {
+            file << mNestedJson.dump(4);
+            file.flush();
+        } else {
+            SPDLOG_ERROR("Could not direct write config \"{}\"", configPath.string());
+        }
     }
 }
 
