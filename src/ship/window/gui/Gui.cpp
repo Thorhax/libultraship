@@ -257,9 +257,15 @@ void Gui::DrawMenu() {
 #endif
         if ((ImGui::IsKeyPressed(ImGuiKey_Escape, false) || ImGui::IsKeyPressed(TOGGLE_PAD_BTN, false)) && GetMenu()) {
             GetMenu()->ToggleVisibility();
+            if (!GetMenu()->IsVisible()) {
+                Ship::Context::GetRawInstance()->GetConsoleVariables()->Save();
+            }
         } else if ((ImGui::IsKeyPressed(TOGGLE_BTN, false) || ImGui::IsKeyPressed(TOGGLE_PAD_BTN, false)) &&
                    GetMenuBar()) {
             GetMenuBar()->ToggleVisibility();
+            if (!GetMenuBar()->IsVisible()) {
+                Ship::Context::GetRawInstance()->GetConsoleVariables()->Save();
+            }
         }
         Ship::Context::GetRawInstance()->GetWindow()->GetMouseStateManager()->UpdateMouseCapture();
         if (Ship::Context::GetRawInstance()->GetConsoleVariables()->GetInteger(CVAR_IMGUI_CONTROLLER_NAV, DEFAULT_IMGUI_CONTROLLER_NAV) &&

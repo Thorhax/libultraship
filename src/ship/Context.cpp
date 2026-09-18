@@ -535,6 +535,16 @@ std::string Context::GetAppBundlePath() {
     }
 #endif
 
+#if defined(__SWITCH__)
+    if (std::filesystem::exists("paperboat.o2r")) {
+        return ".";
+    }
+    if (std::filesystem::exists("sdmc:/switch/paperboat")) {
+        return "sdmc:/switch/paperboat";
+    }
+    return ".";
+#endif
+
     return ".";
 #endif
 }
@@ -576,6 +586,16 @@ std::string Context::GetAppDirectoryPath(const std::string& appName) {
     if (fpath != NULL) {
         return std::string(fpath);
     }
+#endif
+
+#if defined(__SWITCH__)
+    if (std::filesystem::exists("paperboat.o2r")) {
+        return ".";
+    }
+    if (std::filesystem::exists("sdmc:/switch/paperboat")) {
+        return "sdmc:/switch/paperboat";
+    }
+    return ".";
 #endif
 
 #ifdef NON_PORTABLE
