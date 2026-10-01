@@ -285,6 +285,7 @@ bool Context::InitControlDeck(std::shared_ptr<ControlDeck> controlDeck) {
     if (SDL_Init(SDL_INIT_GAMECONTROLLER) != 0) {
         SPDLOG_WARN("Failed to initialize SDL game controllers ({})", SDL_GetError());
     }
+    mControlDeck->GetConnectedPhysicalDeviceManager()->RefreshConnectedSDLGamepads();
 
     return true;
 }

@@ -26,6 +26,8 @@ void ControlDeck::Init(uint8_t* controllerBits) {
     mControllerBits = controllerBits;
     *mControllerBits |= 1 << 0;
 
+    mConnectedPhysicalDeviceManager->RefreshConnectedSDLGamepads();
+
     for (auto port : mPorts) {
         if (port->GetConnectedController()->HasConfig()) {
             port->GetConnectedController()->ReloadAllMappingsFromConfig();
@@ -33,11 +35,17 @@ void ControlDeck::Init(uint8_t* controllerBits) {
     }
 
     // if we don't have a config for controller 1, set default bindings
+#if defined(__SWITCH__)
+    if (!mPorts[0]->GetConnectedController()->HasConfig()) {
+        mPorts[0]->GetConnectedController()->AddDefaultMappings(PhysicalDeviceType::SDLGamepad);
+    }
+#else
     if (!mPorts[0]->GetConnectedController()->HasConfig()) {
         mPorts[0]->GetConnectedController()->AddDefaultMappings(PhysicalDeviceType::Keyboard);
         mPorts[0]->GetConnectedController()->AddDefaultMappings(PhysicalDeviceType::Mouse);
         mPorts[0]->GetConnectedController()->AddDefaultMappings(PhysicalDeviceType::SDLGamepad);
     }
+#endif
 }
 
 bool ControlDeck::ProcessKeyboardEvent(KbEventType eventType, KbScancode scancode) {

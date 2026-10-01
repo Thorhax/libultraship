@@ -22,6 +22,7 @@ ControllerDefaultMappings::ControllerDefaultMappings(
     SetDefaultKeyboardKeyToButtonMappings(defaultKeyboardKeyToButtonMappings);
     SetDefaultSDLButtonToButtonMappings(defaultSDLButtonToButtonMappings);
     SetDefaultSDLAxisDirectionToButtonMappings(defaultSDLAxisDirectionToButtonMappings);
+    SetDefaultSDLButtonToAxisDirectionMappings(defaultSDLButtonToAxisDirectionMappings);
 }
 
 ControllerDefaultMappings::ControllerDefaultMappings()
@@ -75,6 +76,7 @@ void ControllerDefaultMappings::SetDefaultSDLButtonToButtonMappings(
         { BTN_A, { SDL_CONTROLLER_BUTTON_A } },
         { BTN_B, { SDL_CONTROLLER_BUTTON_B } },
         { BTN_L, { SDL_CONTROLLER_BUTTON_LEFTSHOULDER } },
+        { BTN_R, { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER } },
         { BTN_START, { SDL_CONTROLLER_BUTTON_START } },
         { BTN_DUP, { SDL_CONTROLLER_BUTTON_DPAD_UP } },
         { BTN_DDOWN, { SDL_CONTROLLER_BUTTON_DPAD_DOWN } },
@@ -100,5 +102,27 @@ void ControllerDefaultMappings::SetDefaultSDLAxisDirectionToButtonMappings(
         { BTN_CLEFT, { { SDL_CONTROLLER_AXIS_RIGHTX, -1 } } },
         { BTN_CRIGHT, { { SDL_CONTROLLER_AXIS_RIGHTX, 1 } } },
     });
+}
+
+void ControllerDefaultMappings::SetDefaultSDLButtonToAxisDirectionMappings(
+    std::unordered_map<Ship::StickIndex, std::vector<std::pair<Ship::Direction, SDL_GameControllerButton>>>
+        defaultSDLButtonToAxisDirectionMappings) {
+    if (!defaultSDLButtonToAxisDirectionMappings.empty()) {
+        Ship::ControllerDefaultMappings::SetDefaultSDLButtonToAxisDirectionMappings(
+            defaultSDLButtonToAxisDirectionMappings);
+        return;
+    }
+
+#if defined(__SWITCH__)
+    Ship::ControllerDefaultMappings::SetDefaultSDLButtonToAxisDirectionMappings({
+        { Ship::LEFT_STICK,
+          {
+              { Ship::LEFT, SDL_CONTROLLER_BUTTON_DPAD_LEFT },
+              { Ship::RIGHT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT },
+              { Ship::UP, SDL_CONTROLLER_BUTTON_DPAD_UP },
+              { Ship::DOWN, SDL_CONTROLLER_BUTTON_DPAD_DOWN },
+          } },
+    });
+#endif
 }
 } // namespace LUS

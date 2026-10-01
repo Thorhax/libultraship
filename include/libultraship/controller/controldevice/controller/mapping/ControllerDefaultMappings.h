@@ -74,5 +74,13 @@ class ControllerDefaultMappings : public Ship::ControllerDefaultMappings {
     void SetDefaultSDLAxisDirectionToButtonMappings(
         std::unordered_map<CONTROLLERBUTTONS_T, std::vector<std::pair<SDL_GameControllerAxis, int32_t>>>
             defaultSDLAxisDirectionToButtonMappings) override;
+
+    /**
+     * @brief Applies the given SDL-button-to-axis-direction mapping table as the default.
+     * @param defaultSDLButtonToAxisDirectionMappings Map from stick index to (direction, SDL button) pairs.
+     */
+    void SetDefaultSDLButtonToAxisDirectionMappings(
+        std::unordered_map<Ship::StickIndex, std::vector<std::pair<Ship::Direction, SDL_GameControllerButton>>>
+            defaultSDLButtonToAxisDirectionMappings) override;
 };
 } // namespace LUS
